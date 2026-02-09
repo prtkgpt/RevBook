@@ -4,19 +4,30 @@ export function Card({
   children,
   className,
   hover,
+  gradient,
 }: {
   children: React.ReactNode;
   className?: string;
   hover?: boolean;
+  gradient?: boolean;
 }) {
   return (
     <div
       className={clsx(
-        "rounded-xl border border-gray-200 bg-white shadow-sm",
-        hover && "transition-shadow duration-200 hover:shadow-md",
+        "relative rounded-xl border border-gray-200/80 bg-white shadow-sm",
+        hover && "transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-indigo-200/60 hover:shadow-lg",
+        gradient && "overflow-hidden",
         className
       )}
     >
+      {gradient && (
+        <div
+          className="absolute inset-x-0 top-0 h-[3px]"
+          style={{
+            background: "linear-gradient(90deg, #6366f1, #8b5cf6, #a78bfa)",
+          }}
+        />
+      )}
       {children}
     </div>
   );
