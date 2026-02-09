@@ -23,14 +23,19 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        const dbUser = await prisma.user.findUnique({
-          where: { id: user.id },
-          select: { id: true, role: true, businessId: true },
-        });
-        if (dbUser) {
-          token.userId = dbUser.id;
-          token.role = dbUser.role;
-          token.businessId = dbUser.businessId;
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: user.id },
+            select: { id: true, role: true, businessId: true },
+          });
+          if (dbUser) {
+            token.userId = dbUser.id;
+            token.role = dbUser.role;
+            token.businessId = dbUser.businessId;
+          }
+        } catch (error) {
+          console.error("Failed to fetch user in JWT callback:", error);
+          token.userId = user.id;
         }
       }
       return token;
@@ -38,8 +43,8 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.userId as string;
-        session.user.role = token.role as string;
-        session.user.businessId = token.businessId as string | null;
+        session.user.role = (token.role as string) || "MEMBER";
+        session.user.businessId = (token.businessId as string | null) ?? null;
       }
       return session;
     },
@@ -50,7 +55,12 @@ export const authOptions: NextAuthOptions = {
 };
 
 export async function getSession() {
-  return getServerSession(authOptions);
+  try {
+    return await getServerSession(authOptions);
+  } catch (error) {
+    console.error("getSession failed:", error);
+    return null;
+  }
 }
 
 export async function requireAuth() {

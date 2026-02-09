@@ -13,6 +13,7 @@ export default async function AppLayout({
     redirect("/signin");
   }
 
+  // If no business yet, allow access (for onboarding page)
   return (
     <div className="min-h-screen bg-gray-50/50">
       <Nav />

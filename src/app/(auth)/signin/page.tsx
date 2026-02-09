@@ -45,7 +45,7 @@ export default function SignInPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
-            <span className="text-xl font-bold">SlotSaver</span>
+            <span className="text-xl font-bold">RevBook</span>
           </div>
         </div>
 
@@ -89,7 +89,7 @@ export default function SignInPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <span className="text-lg font-bold text-gray-900">SlotSaver</span>
+              <span className="text-lg font-bold text-gray-900">RevBook</span>
             </div>
           </div>
 

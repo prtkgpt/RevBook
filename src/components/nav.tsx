@@ -27,7 +27,7 @@ export function Nav() {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <span className="text-lg font-bold tracking-tight text-gray-900">SlotSaver</span>
+              <span className="text-lg font-bold tracking-tight text-gray-900">RevBook</span>
             </Link>
 
             <div className="hidden md:flex md:gap-1">

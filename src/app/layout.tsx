@@ -3,7 +3,7 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 
 export const metadata: Metadata = {
-  title: "SlotSaver",
+  title: "RevBook",
   description: "Fill empty appointment slots automatically",
 };
 
