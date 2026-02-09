@@ -11,8 +11,10 @@ export default function SignInPage() {
   const { status } = useSession();
   const router = useRouter();
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [mode, setMode] = useState<"magic" | "password">("magic");
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -20,22 +22,42 @@ export default function SignInPage() {
     }
   }, [status, router]);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleMagicLink(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-
     try {
       const result = await signIn("email", {
         email,
         redirect: false,
         callbackUrl: "/app",
       });
-
       if (result?.error) {
         toast.error("Failed to send magic link");
       } else {
         setSent(true);
         toast.success("Check your email for the magic link!");
+      }
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handlePassword(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+        callbackUrl: "/app",
+      });
+      if (result?.error) {
+        toast.error("Invalid email or password");
+      } else if (result?.ok) {
+        router.push("/app");
       }
     } catch {
       toast.error("Something went wrong");
@@ -108,7 +130,9 @@ export default function SignInPage() {
               Welcome back
             </h1>
             <p className="mt-2 text-sm text-gray-500">
-              Sign in with a magic link sent to your email
+              {mode === "magic"
+                ? "Sign in with a magic link sent to your email"
+                : "Sign in with your email and password"}
             </p>
           </div>
 
@@ -123,9 +147,15 @@ export default function SignInPage() {
               <p className="mt-1 text-sm text-gray-600">
                 We sent a magic link to <strong>{email}</strong>
               </p>
+              <button
+                onClick={() => setSent(false)}
+                className="mt-4 text-sm font-medium text-indigo-600 hover:text-indigo-700"
+              >
+                Try another method
+              </button>
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-5">
+          ) : mode === "magic" ? (
+            <form onSubmit={handleMagicLink} className="space-y-5">
               <Input
                 label="Email address"
                 type="email"
@@ -138,8 +168,65 @@ export default function SignInPage() {
               <Button type="submit" className="w-full" size="lg" loading={loading}>
                 Continue with email
               </Button>
+              <div className="relative py-2">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white px-2 text-gray-400">or</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMode("password")}
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
+              >
+                Sign in with password
+              </button>
               <p className="text-center text-xs text-gray-400">
                 We&#39;ll send you a secure sign-in link. No password needed.
+              </p>
+            </form>
+          ) : (
+            <form onSubmit={handlePassword} className="space-y-5">
+              <Input
+                label="Email address"
+                type="email"
+                id="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <Input
+                label="Password"
+                type="password"
+                id="password"
+                placeholder="Your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <Button type="submit" className="w-full" size="lg" loading={loading}>
+                Sign in
+              </Button>
+              <div className="relative py-2">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-200" />
+                </div>
+                <div className="relative flex justify-center text-xs uppercase">
+                  <span className="bg-white px-2 text-gray-400">or</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMode("magic")}
+                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
+              >
+                Sign in with magic link
+              </button>
+              <p className="text-center text-xs text-gray-400">
+                Forgot your password? Use a magic link to sign in and reset it from Settings.
               </p>
             </form>
           )}

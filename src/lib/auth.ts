@@ -1,13 +1,37 @@
 import { NextAuthOptions, getServerSession } from "next-auth";
 import EmailProvider from "next-auth/providers/email";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import type { Adapter } from "next-auth/adapters";
 import { Resend } from "resend";
+import { compare } from "bcryptjs";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as Adapter,
   providers: [
+    CredentialsProvider({
+      id: "credentials",
+      name: "Password",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
+
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email },
+        });
+
+        if (!user?.passwordHash) return null;
+
+        const valid = await compare(credentials.password, user.passwordHash);
+        if (!valid) return null;
+
+        return { id: user.id, email: user.email, name: user.name };
+      },
+    }),
     EmailProvider({
       from: process.env.EMAIL_FROM || "onboarding@resend.dev",
       sendVerificationRequest: async ({ identifier: email, url }) => {

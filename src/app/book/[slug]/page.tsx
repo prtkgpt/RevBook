@@ -146,11 +146,12 @@ export default function PublicBookingPage({
 
     setSubmitting(true);
     try {
-      const res = await fetch(`/api/public/${slug}/book`, {
+      const res = await fetch(`/api/stripe/checkout`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           slotId: slot.id,
+          slug,
           customerName: customerName.trim(),
           customerEmail: customerEmail.trim(),
           customerPhone: customerPhone.trim() || undefined,
@@ -162,6 +163,15 @@ export default function PublicBookingPage({
         throw new Error(data.error || "Booking failed. Please try again.");
       }
 
+      const data = await res.json();
+
+      if (data.mode === "stripe" && data.url) {
+        // Redirect to Stripe Checkout
+        window.location.href = data.url;
+        return;
+      }
+
+      // Direct booking (no Stripe)
       setConfirmation({
         serviceType: slot.serviceType,
         date: format(new Date(slot.startTime), "EEEE, MMMM d, yyyy"),

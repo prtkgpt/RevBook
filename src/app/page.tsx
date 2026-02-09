@@ -1,5 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { DemoForm } from "@/components/demo-form";
+import { FaqAccordion } from "@/components/faq-accordion";
 
 export const metadata: Metadata = {
   title: "RevBook — Never Lose Money on Unsold Appointments Again",
@@ -253,6 +255,12 @@ export default function HomePage() {
               className="hidden sm:inline-flex text-sm font-medium text-gray-600 transition-colors duration-200 hover:text-indigo-600"
             >
               Login
+            </Link>
+            <Link
+              href="#demo"
+              className="hidden sm:inline-flex items-center rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm transition-all duration-200 hover:border-indigo-300 hover:text-indigo-600 active:scale-[0.97]"
+            >
+              Book a Demo
             </Link>
             <Link
               href="/signin"
@@ -787,122 +795,133 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ═══════════════════════ 9. CTA SECTION ════════════════════ */}
-      <section className="px-6 py-24 md:py-32">
-        <div className="mx-auto max-w-3xl rounded-3xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-700 p-12 text-center shadow-2xl shadow-indigo-500/20 sm:p-16 relative overflow-hidden">
-          {/* Decorative shapes */}
-          <div className="pointer-events-none absolute -top-12 -right-12 h-48 w-48 rounded-full bg-white/5 blur-2xl" />
-          <div className="pointer-events-none absolute -bottom-8 -left-8 h-36 w-36 rounded-full bg-white/5 blur-xl" />
-
-          <h2 className="relative font-serif text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Start selling time that would&rsquo;ve gone unsold
-          </h2>
-          <p className="relative mt-4 text-lg text-indigo-200">
-            Most businesses see measurable results within the first 2 weeks.
-            Early customers report up to 15&ndash;25% revenue uplift.
-          </p>
-          <Link
-            href="/signin"
-            className="relative mt-8 inline-flex items-center rounded-xl bg-white px-8 py-3.5 text-base font-semibold text-indigo-700 shadow-lg transition-all duration-200 hover:bg-indigo-50 hover:shadow-xl active:scale-[0.97]"
-          >
-            Get Started Free
-            <svg className="ml-2 w-4 h-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 8h10M9 4l4 4-4 4" />
-            </svg>
-          </Link>
+      {/* ═══════════════════════ 9. SERVICE BUSINESS BANNER ══════════ */}
+      <section className="px-6 py-16 md:py-20">
+        <div className="mx-auto max-w-5xl">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-500 via-violet-500 to-indigo-500 px-8 py-14 md:px-16 md:py-16">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.12),transparent_60%)]" />
+            <div className="relative flex flex-col items-center gap-8 md:flex-row md:justify-between">
+              <div className="max-w-md">
+                <h2 className="font-serif text-3xl font-bold leading-tight text-white sm:text-4xl">
+                  RevBook works for any service business.
+                </h2>
+                <p className="mt-2 text-xl font-medium text-indigo-200">
+                  Let us see if we can help yours.
+                </p>
+              </div>
+              <Link
+                href="#features"
+                className="inline-flex shrink-0 items-center rounded-xl border-2 border-white/80 bg-white/10 px-8 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:bg-white hover:text-indigo-600 active:scale-[0.97]"
+              >
+                See Use Cases
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ═══════════════════════ 10. FOOTER ═════════════════════════ */}
-      <footer className="border-t border-gray-200/60 bg-white/30 backdrop-blur-sm px-6 py-16">
-        <div className="mx-auto max-w-6xl">
-          <div className="grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
-            {/* Brand */}
-            <div>
-              <Link href="/" className="flex items-center gap-2">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white">
-                  <LightningIcon className="w-4 h-4" />
-                </span>
-                <span className="text-lg font-bold tracking-tight text-gray-900">
-                  RevBook
-                </span>
-              </Link>
-              <p className="mt-3 text-sm text-gray-500 leading-relaxed">
-                Automated appointment slot optimization with smart, dynamic
-                pricing.
-              </p>
-            </div>
-
-            {/* Product */}
-            <div>
-              <div className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                Product
-              </div>
-              <ul className="mt-4 space-y-3">
-                {[
-                  ["Features", "#features"],
-                  ["Pricing", "#pricing"],
-                  ["Blog", "/blog"],
-                ].map(([label, href]) => (
-                  <li key={label}>
-                    <Link
-                      href={href}
-                      className="text-sm text-gray-600 transition-colors duration-200 hover:text-indigo-600"
-                    >
-                      {label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Company */}
-            <div>
-              <div className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                Company
-              </div>
-              <ul className="mt-4 space-y-3">
-                {[
-                  ["About", "#how-it-works"],
-                  ["Contact", "mailto:hello@revbookapp.com"],
-                ].map(([label, href]) => (
-                  <li key={label}>
-                    <Link
-                      href={href}
-                      className="text-sm text-gray-600 transition-colors duration-200 hover:text-indigo-600"
-                    >
-                      {label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Legal */}
-            <div>
-              <div className="text-xs font-semibold uppercase tracking-wider text-gray-400">
-                Legal
-              </div>
-              <ul className="mt-4 space-y-3">
-                {[
-                  ["Privacy", "/blog"],
-                  ["Terms", "/blog"],
-                ].map(([label, href]) => (
-                  <li key={label}>
-                    <Link
-                      href={href}
-                      className="text-sm text-gray-600 transition-colors duration-200 hover:text-indigo-600"
-                    >
-                      {label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+      {/* ═══════════════════════ 10. FAQ ══════════════════════════════ */}
+      <section id="faq" className="px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-2xl">
+          <div className="text-center mb-12">
+            <h2 className="font-serif text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+              Frequently Asked{" "}
+              <span className="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                Questions
+              </span>
+            </h2>
+            <p className="mt-4 text-base text-gray-500">
+              Everything you need to know about rescuing revenue from empty time slots
+            </p>
           </div>
 
-          <div className="mt-12 border-t border-gray-200/60 pt-8 text-center text-sm text-gray-400">
-            &copy; 2026 RevBook. All rights reserved.
+          <FaqAccordion />
+        </div>
+      </section>
+
+      {/* ═══════════════════════ 11. READY TO RESCUE CTA ═════════════ */}
+      <section className="px-6 py-16 md:py-20">
+        <div className="mx-auto max-w-2xl">
+          <div className="rounded-2xl border border-gray-200/80 bg-white/70 px-8 py-12 text-center backdrop-blur-sm shadow-lg">
+            <h2 className="font-serif text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+              Ready to Rescue Revenue?
+            </h2>
+            <p className="mt-3 text-base text-gray-500 max-w-md mx-auto">
+              Schedule a demo to see how RevBook can predict and fill your empty slots
+            </p>
+            <Link
+              href="#demo"
+              className="mt-6 inline-flex items-center rounded-xl bg-indigo-600 px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition-all duration-200 hover:bg-indigo-700 hover:shadow-xl active:scale-[0.97]"
+            >
+              Book a Demo
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════ 12. BOOK A DEMO / CONTACT ════════════ */}
+      <section id="demo" className="px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-5xl">
+          <div className="grid gap-12 lg:grid-cols-2 items-center">
+            {/* Left - Copy */}
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-indigo-600 mb-4">
+                Talk to our team
+              </div>
+              <h2 className="font-serif text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+                Book a demo or get in touch
+              </h2>
+              <p className="mt-4 text-lg text-gray-500 leading-relaxed">
+                See RevBook in action. Our team will walk you through how dynamic
+                pricing can fill your empty slots and boost your revenue. Most
+                businesses see measurable results within the first 2 weeks.
+              </p>
+              <div className="mt-8 space-y-4">
+                {[
+                  "Personalized walkthrough of the platform",
+                  "Help setting up your first rules",
+                  "No commitment — free consultation",
+                ].map((item) => (
+                  <div key={item} className="flex items-center gap-3">
+                    <CheckIcon />
+                    <span className="text-sm text-gray-600">{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right - Form */}
+            <div className="rounded-2xl border border-gray-200/80 bg-white/70 p-8 backdrop-blur-sm shadow-lg">
+              <DemoForm />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════ 13. FOOTER (Booko-style) ═══════════ */}
+      <footer className="bg-gray-50/80 backdrop-blur-sm">
+        <div className="mx-auto max-w-6xl px-6 pt-16 pb-8">
+          <div className="text-center">
+            <p className="text-sm text-gray-400">
+              &copy; 2026 RevBook App Inc. All rights reserved.
+            </p>
+          </div>
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+            {[
+              ["Terms of Service", "/blog"],
+              ["Privacy Policy", "/blog"],
+              ["Payments & Fees", "#pricing"],
+              ["Data Processing", "/blog"],
+              ["Cookie Policy", "/blog"],
+            ].map(([label, href]) => (
+              <Link
+                key={label}
+                href={href}
+                className="text-sm text-gray-500 transition-colors duration-200 hover:text-indigo-600"
+              >
+                {label}
+              </Link>
+            ))}
           </div>
         </div>
       </footer>
