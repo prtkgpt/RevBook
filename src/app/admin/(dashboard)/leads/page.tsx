@@ -93,20 +93,20 @@ export default function LeadsPage() {
 
   if (loading) {
     return (
-      <div className="p-8">
+      <div className="page-enter">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 w-48 rounded bg-gray-700" />
-          <div className="h-64 rounded-lg bg-gray-800" />
+          <div className="h-8 w-48 rounded bg-gray-200" />
+          <div className="h-64 rounded-xl bg-gray-100" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-8">
+    <div className="page-enter">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Inbound Prospects</h1>
-        <p className="mt-1 text-sm text-gray-400">
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900">Inbound Prospects</h1>
+        <p className="mt-1 text-sm text-gray-500">
           Leads from the marketing site &mdash; &quot;Talk to our team&quot; and &quot;Book a demo&quot; submissions.
         </p>
       </div>
@@ -115,14 +115,14 @@ export default function LeadsPage() {
       {counts && (
         <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-5">
           {[
-            { label: "Total", value: counts.total, color: "text-white" },
-            { label: "New", value: counts.new, color: "text-blue-400" },
-            { label: "Contacted", value: counts.contacted, color: "text-amber-400" },
-            { label: "Qualified", value: counts.qualified, color: "text-purple-400" },
-            { label: "Converted", value: counts.converted, color: "text-green-400" },
+            { label: "Total", value: counts.total, color: "text-gray-900" },
+            { label: "New", value: counts.new, color: "text-blue-600" },
+            { label: "Contacted", value: counts.contacted, color: "text-amber-600" },
+            { label: "Qualified", value: counts.qualified, color: "text-purple-600" },
+            { label: "Converted", value: counts.converted, color: "text-green-600" },
           ].map((kpi) => (
-            <div key={kpi.label} className="rounded-lg bg-gray-800/50 border border-gray-700/50 p-4">
-              <p className="text-xs text-gray-500 uppercase tracking-wider">{kpi.label}</p>
+            <div key={kpi.label} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{kpi.label}</p>
               <p className={`mt-1 text-2xl font-bold ${kpi.color}`}>{kpi.value}</p>
             </div>
           ))}
@@ -130,35 +130,35 @@ export default function LeadsPage() {
       )}
 
       {/* Leads table */}
-      <div className="rounded-lg border border-gray-700/50 bg-gray-800/30 overflow-hidden">
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
         <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-gray-700/50 text-left text-xs uppercase tracking-wider text-gray-500">
-              <th className="px-4 py-3">Name</th>
-              <th className="px-4 py-3">Company</th>
-              <th className="px-4 py-3">Source</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Date</th>
-              <th className="px-4 py-3"></th>
+          <thead className="bg-gray-50/80">
+            <tr>
+              <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Name</th>
+              <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Company</th>
+              <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Source</th>
+              <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Status</th>
+              <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-gray-500">Date</th>
+              <th className="px-4 py-3.5"></th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-gray-100">
             {leads.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-12 text-center text-gray-500">
+                <td colSpan={6} className="px-4 py-12 text-center text-gray-400">
                   No inbound leads yet. They&apos;ll appear here when someone fills out the contact form.
                 </td>
               </tr>
             ) : (
               leads.map((lead) => (
-                <tr key={lead.id} className="border-b border-gray-700/30 hover:bg-gray-800/40">
+                <tr key={lead.id} className="transition-colors hover:bg-gray-50">
                   <td className="px-4 py-3">
-                    <div className="font-medium text-white">{lead.name}</div>
+                    <div className="font-medium text-gray-900">{lead.name}</div>
                     <div className="text-xs text-gray-500">{lead.email}</div>
                   </td>
-                  <td className="px-4 py-3 text-gray-400">{lead.company || "—"}</td>
+                  <td className="px-4 py-3 text-gray-600">{lead.company || "—"}</td>
                   <td className="px-4 py-3">
-                    <span className="inline-flex rounded-full bg-gray-700 px-2 py-0.5 text-xs text-gray-300">
+                    <span className="inline-flex rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
                       {lead.source}
                     </span>
                   </td>
@@ -174,13 +174,13 @@ export default function LeadsPage() {
                       ))}
                     </select>
                   </td>
-                  <td className="px-4 py-3 text-gray-500 text-xs">
+                  <td className="px-4 py-3 text-xs text-gray-500">
                     {format(new Date(lead.createdAt), "MMM d, yyyy")}
                   </td>
                   <td className="px-4 py-3">
                     <button
                       onClick={() => { setSelectedLead(lead); setNotes(lead.notes || ""); }}
-                      className="text-xs text-indigo-400 hover:text-indigo-300"
+                      className="text-xs font-medium text-indigo-600 hover:text-indigo-800"
                     >
                       View
                     </button>
@@ -195,25 +195,25 @@ export default function LeadsPage() {
       {/* Lead detail slide-over */}
       {selectedLead && (
         <div className="fixed inset-0 z-50 flex justify-end">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setSelectedLead(null)} />
-          <div className="relative w-full max-w-md bg-gray-900 border-l border-gray-700 p-6 overflow-y-auto">
-            <button onClick={() => setSelectedLead(null)} className="absolute top-4 right-4 text-gray-500 hover:text-white">
+          <div className="absolute inset-0 bg-black/30" onClick={() => setSelectedLead(null)} />
+          <div className="relative w-full max-w-md bg-white border-l border-gray-200 p-6 overflow-y-auto shadow-xl">
+            <button onClick={() => setSelectedLead(null)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
 
-            <h2 className="text-lg font-bold text-white">{selectedLead.name}</h2>
-            <p className="text-sm text-gray-400">{selectedLead.email}</p>
-            {selectedLead.phone && <p className="text-sm text-gray-400">{selectedLead.phone}</p>}
+            <h2 className="text-lg font-bold text-gray-900">{selectedLead.name}</h2>
+            <p className="text-sm text-gray-500">{selectedLead.email}</p>
+            {selectedLead.phone && <p className="text-sm text-gray-500">{selectedLead.phone}</p>}
             {selectedLead.company && (
-              <p className="mt-1 text-sm text-gray-300">{selectedLead.company}</p>
+              <p className="mt-1 text-sm text-gray-700">{selectedLead.company}</p>
             )}
 
             {selectedLead.message && (
               <div className="mt-6">
                 <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500">Message</h3>
-                <p className="mt-2 text-sm text-gray-300 whitespace-pre-wrap">{selectedLead.message}</p>
+                <p className="mt-2 text-sm text-gray-700 whitespace-pre-wrap">{selectedLead.message}</p>
               </div>
             )}
 
@@ -223,7 +223,7 @@ export default function LeadsPage() {
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={4}
-                className="mt-2 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder:text-gray-600 focus:border-indigo-500 focus:outline-none"
+                className="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
                 placeholder="Add internal notes..."
               />
               <button

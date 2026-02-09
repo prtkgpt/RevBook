@@ -25,6 +25,7 @@ export async function GET() {
       id: b.id,
       name: b.name,
       slug: b.slug,
+      timezone: b.timezone,
       createdAt: b.createdAt,
       ownerEmail: b.users[0]?.email || null,
       _count: b._count,
