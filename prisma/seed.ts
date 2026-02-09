@@ -17,6 +17,7 @@ async function main() {
   await prisma.customer.deleteMany();
   await prisma.discountRule.deleteMany();
   await prisma.slot.deleteMany();
+  await prisma.slotTemplate.deleteMany();
   await prisma.session.deleteMany();
   await prisma.account.deleteMany();
   await prisma.user.deleteMany();

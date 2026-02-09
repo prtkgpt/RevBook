@@ -83,12 +83,36 @@ model Business {
   updatedAt         DateTime @updatedAt
 
   users           User[]
+  slotTemplates   SlotTemplate[]
   slots           Slot[]
   discountRules   DiscountRule[]
   customers       Customer[]
   offers          Offer[]
   messageLogs     MessageLog[]
   bookings        Booking[]
+}
+
+model SlotTemplate {
+  id              String   @id @default(cuid())
+  businessId      String
+  business        Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name            String                   // "Haircut", "Consultation"
+  durationMinutes Int      @default(30)
+  capacity        Int      @default(1)
+  basePriceCents  Int
+  color           String   @default("#4f46e5")
+  weeklyHours     String   @db.Text         // JSON: {"0":[],"1":[{"start":"09:00","end":"17:00"}],...}
+  daysInAdvance   Int      @default(60)
+  minNoticeHours  Int      @default(4)
+  bufferMinutes   Int      @default(0)
+  enabled         Boolean  @default(true)
+  lastGeneratedAt DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  slots           Slot[]
+
+  @@index([businessId])
 }
 
 enum SlotStatus {
@@ -98,24 +122,27 @@ enum SlotStatus {
 }
 
 model Slot {
-  id            String     @id @default(cuid())
+  id            String        @id @default(cuid())
   businessId    String
-  business      Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  business      Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  templateId    String?
+  template      SlotTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
   serviceType   String
   startTime     DateTime
   endTime       DateTime
-  capacity      Int        @default(1)
-  bookedCount   Int        @default(0)
+  capacity      Int           @default(1)
+  bookedCount   Int           @default(0)
   basePriceCents Int
-  status        SlotStatus @default(OPEN)
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  status        SlotStatus    @default(OPEN)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   offers        Offer[]
   bookings      Booking[]
 
   @@index([businessId, startTime])
   @@index([businessId, status])
+  @@index([templateId])
 }
 
 model DiscountRule {
