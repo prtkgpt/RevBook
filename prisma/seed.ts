@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { addDays, addHours, setHours, setMinutes } from "date-fns";
+import { hashSync } from "bcryptjs";
 
 const prisma = new PrismaClient();
 
@@ -7,6 +8,8 @@ async function main() {
   console.log("Seeding database...");
 
   // Clean existing data
+  await prisma.blogPost.deleteMany();
+  await prisma.adminUser.deleteMany();
   await prisma.booking.deleteMany();
   await prisma.messageLog.deleteMany();
   await prisma.offer.deleteMany();
@@ -17,6 +20,31 @@ async function main() {
   await prisma.account.deleteMany();
   await prisma.user.deleteMany();
   await prisma.business.deleteMany();
+
+  // Create platform admin
+  const admin = await prisma.adminUser.create({
+    data: {
+      email: "scootergupta@gmail.com",
+      passwordHash: hashSync("password123", 12),
+      name: "Scooter Gupta",
+      role: "SUPER_ADMIN",
+    },
+  });
+  console.log("Created admin:", admin.email);
+
+  // Create sample blog post
+  await prisma.blogPost.create({
+    data: {
+      slug: "welcome-to-revbook",
+      title: "Welcome to RevBook — Fill Every Empty Slot",
+      excerpt: "Discover how RevBook helps service businesses automatically fill empty appointment slots with smart, dynamic pricing.",
+      content: `# Welcome to RevBook\n\nRevBook is the smartest way for service businesses to fill empty appointment slots.\n\n## The Problem\n\nEvery empty slot is lost revenue. Whether you run a salon, spa, fitness studio, or consulting practice, unfilled appointments are money left on the table.\n\n## The Solution\n\nRevBook automatically applies smart discounts to your underperforming slots based on rules you define. Our AI-powered demand forecasting predicts which slots will go unfilled and suggests the optimal discount to maximize your revenue.\n\n## Key Features\n\n- **Dynamic Pricing** — Prices adjust based on demand in real-time\n- **Smart Rules Engine** — Set conditions like time-of-day, fill rate, and days of week\n- **Public Booking Page** — Give customers a beautiful, branded booking experience\n- **Demand Forecasting** — AI predicts fill rates and suggests discounts\n- **Customer Targeting** — RFM scoring segments your customers for personalized offers\n\nGet started today at [revbookapp.com](https://revbookapp.com).`,
+      authorId: admin.id,
+      status: "PUBLISHED",
+      publishedAt: new Date(),
+    },
+  });
+  console.log("Created sample blog post");
 
   // Create business
   const business = await prisma.business.create({
