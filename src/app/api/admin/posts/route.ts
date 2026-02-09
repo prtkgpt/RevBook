@@ -41,6 +41,13 @@ export async function POST(req: Request) {
       );
     }
 
+    if (status && !["DRAFT", "PUBLISHED"].includes(status)) {
+      return NextResponse.json(
+        { error: "Status must be DRAFT or PUBLISHED" },
+        { status: 400 }
+      );
+    }
+
     const existingSlug = await prisma.blogPost.findUnique({
       where: { slug },
     });

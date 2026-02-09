@@ -59,11 +59,13 @@ model User {
   image         String?
   role          Role      @default(MEMBER)
   businessId    String?
-  business      Business? @relation(fields: [businessId], references: [id])
+  business      Business? @relation(fields: [businessId], references: [id], onDelete: SetNull)
   accounts      Account[]
   sessions      Session[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  @@index([businessId])
 }
 
 model Business {
@@ -213,6 +215,7 @@ model MessageLog {
 
   @@index([customerId, sentAt])
   @@index([businessId, createdAt])
+  @@index([offerId, sentAt])
 }
 
 // ── Public bookings ─────────────────────────────────────────
@@ -270,7 +273,7 @@ model BlogPost {
   content     String     @db.Text
   coverImage  String?
   authorId    String
-  author      AdminUser  @relation(fields: [authorId], references: [id])
+  author      AdminUser  @relation(fields: [authorId], references: [id], onDelete: Cascade)
   status      PostStatus @default(DRAFT)
   publishedAt DateTime?
   createdAt   DateTime   @default(now())

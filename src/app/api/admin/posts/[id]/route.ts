@@ -52,6 +52,13 @@ export async function PATCH(
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
+    if (status && !["DRAFT", "PUBLISHED"].includes(status)) {
+      return NextResponse.json(
+        { error: "Status must be DRAFT or PUBLISHED" },
+        { status: 400 }
+      );
+    }
+
     // Check slug uniqueness if changing
     if (slug && slug !== existing.slug) {
       const slugTaken = await prisma.blogPost.findUnique({ where: { slug } });

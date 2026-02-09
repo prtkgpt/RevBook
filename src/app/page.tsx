@@ -863,8 +863,8 @@ export default function HomePage() {
               </div>
               <ul className="mt-4 space-y-3">
                 {[
-                  ["About", "#"],
-                  ["Contact", "#"],
+                  ["About", "#how-it-works"],
+                  ["Contact", "mailto:hello@revbookapp.com"],
                 ].map(([label, href]) => (
                   <li key={label}>
                     <Link
@@ -885,8 +885,8 @@ export default function HomePage() {
               </div>
               <ul className="mt-4 space-y-3">
                 {[
-                  ["Privacy", "#"],
-                  ["Terms", "#"],
+                  ["Privacy", "/blog"],
+                  ["Terms", "/blog"],
                 ].map(([label, href]) => (
                   <li key={label}>
                     <Link
