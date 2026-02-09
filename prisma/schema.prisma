@@ -1,0 +1,213 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── NextAuth models ──────────────────────────────────────────
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ── Core models ──────────────────────────────────────────────
+
+enum Role {
+  OWNER
+  MEMBER
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          Role      @default(MEMBER)
+  businessId    String?
+  business      Business? @relation(fields: [businessId], references: [id])
+  accounts      Account[]
+  sessions      Session[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Business {
+  id              String   @id @default(cuid())
+  name            String
+  timezone        String   @default("America/New_York")
+  bookingBaseUrl  String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  users           User[]
+  slots           Slot[]
+  discountRules   DiscountRule[]
+  customers       Customer[]
+  offers          Offer[]
+  messageLogs     MessageLog[]
+}
+
+enum SlotStatus {
+  OPEN
+  FULL
+  CANCELLED
+}
+
+model Slot {
+  id            String     @id @default(cuid())
+  businessId    String
+  business      Business   @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  serviceType   String
+  startTime     DateTime
+  endTime       DateTime
+  capacity      Int        @default(1)
+  bookedCount   Int        @default(0)
+  basePriceCents Int
+  status        SlotStatus @default(OPEN)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  offers        Offer[]
+
+  @@index([businessId, startTime])
+  @@index([businessId, status])
+}
+
+model DiscountRule {
+  id              String   @id @default(cuid())
+  businessId      String
+  business        Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name            String
+  enabled         Boolean  @default(true)
+  priority        Int      @default(0)
+
+  // Conditions
+  hoursBeforeSlot  Int?     // if slot is within X hours
+  maxBookedPercent Int?     // if bookedPercent < Y (0-100)
+  daysOfWeek       String?  // comma-separated: "1,2,3,4,5" (Mon-Fri) ISO weekday
+  afterTimeOfDay   String?  // "14:00" - applies after this time
+  beforeTimeOfDay  String?  // "18:00" - applies before this time
+  serviceTypes     String?  // comma-separated service types to match, null = all
+
+  // Action
+  discountPercent  Int      // e.g., 20 for 20% off
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  offers           Offer[]
+
+  @@index([businessId, enabled])
+}
+
+enum OfferStatus {
+  DRAFT
+  SENT
+  CLAIMED
+  EXPIRED
+}
+
+model Offer {
+  id                String      @id @default(cuid())
+  businessId        String
+  business          Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  slotId            String
+  slot              Slot        @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  ruleId            String
+  rule              DiscountRule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  discountPercent   Int
+  discountedPriceCents Int
+  status            OfferStatus @default(DRAFT)
+  disabledByUser    Boolean     @default(false)
+  expiresAt         DateTime
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  messageLogs       MessageLog[]
+
+  @@unique([slotId, ruleId])
+  @@index([businessId, status])
+  @@index([slotId])
+}
+
+model Customer {
+  id            String   @id @default(cuid())
+  businessId    String
+  business      Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name          String
+  email         String?
+  phone         String?
+  tags          String?  // comma-separated tags matching serviceType
+  lastBookedAt  DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  messageLogs   MessageLog[]
+
+  @@unique([businessId, email])
+  @@index([businessId])
+}
+
+enum MessageChannel {
+  EMAIL
+  SMS
+}
+
+enum MessageStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model MessageLog {
+  id          String         @id @default(cuid())
+  businessId  String
+  business    Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  offerId     String
+  offer       Offer          @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  customerId  String
+  customer    Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  channel     MessageChannel
+  status      MessageStatus  @default(PENDING)
+  sentAt      DateTime?
+  externalId  String?        // Resend or Twilio message ID
+  createdAt   DateTime       @default(now())
+
+  @@index([customerId, sentAt])
+  @@index([businessId, createdAt])
+}
