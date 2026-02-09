@@ -487,7 +487,7 @@ export default function DashboardPage() {
                   slots to get started.
                 </p>
               </div>
-              <Button variant="primary" size="md" className="mt-2">
+              <Button variant="primary" size="md" className="mt-2" onClick={() => window.location.href = "/app/slots"}>
                 Create a Slot
               </Button>
             </div>
