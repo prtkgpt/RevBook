@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { Nav } from "@/components/nav";
 
 export default async function AppLayout({
@@ -10,10 +10,26 @@ export default async function AppLayout({
   const session = await getSession();
 
   if (!session?.user) {
-    redirect("/signin");
+    return null;
   }
 
-  // If no business yet, allow access (for onboarding page)
+  // Check if user has a business (DB is source of truth, JWT may be stale)
+  const dbUser = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { businessId: true },
+  });
+
+  const hasBusiness = !!dbUser?.businessId;
+
+  if (!hasBusiness) {
+    // No nav for onboarding flow
+    return (
+      <div className="min-h-screen bg-gray-50/50">
+        {children}
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50/50">
       <Nav />

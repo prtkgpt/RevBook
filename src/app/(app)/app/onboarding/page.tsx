@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardBody } from "@/components/ui/card";
@@ -29,6 +30,7 @@ const STEPS = [
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { update } = useSession();
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
   const [timezone, setTimezone] = useState("America/New_York");
@@ -52,6 +54,8 @@ export default function OnboardingPage() {
       }
 
       toast.success("Business created!");
+      // Refresh JWT so businessId is available
+      await update();
       router.push("/app");
       router.refresh();
     } catch {

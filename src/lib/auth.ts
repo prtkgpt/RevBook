@@ -57,11 +57,13 @@ export const authOptions: NextAuthOptions = {
   ],
   session: { strategy: "jwt" },
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
+    async jwt({ token, user, trigger }) {
+      // Refresh from DB on sign-in, session update, or if businessId is missing
+      if (user || trigger === "update" || !token.businessId) {
         try {
+          const id = (user?.id as string) || (token.userId as string);
           const dbUser = await prisma.user.findUnique({
-            where: { id: user.id },
+            where: { id },
             select: { id: true, role: true, businessId: true },
           });
           if (dbUser) {
@@ -71,7 +73,7 @@ export const authOptions: NextAuthOptions = {
           }
         } catch (error) {
           console.error("Failed to fetch user in JWT callback:", error);
-          token.userId = user.id;
+          if (user) token.userId = user.id;
         }
       }
       return token;
@@ -109,7 +111,19 @@ export async function requireAuth() {
 
 export async function requireBusiness() {
   const session = await requireAuth();
-  if (!session.user.businessId) {
+  // Check DB directly — JWT businessId may be stale after onboarding
+  let businessId = session.user.businessId;
+  if (!businessId) {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { businessId: true },
+    });
+    businessId = dbUser?.businessId ?? null;
+    if (businessId) {
+      session.user.businessId = businessId;
+    }
+  }
+  if (!businessId) {
     throw new Error("No business");
   }
   return session;
