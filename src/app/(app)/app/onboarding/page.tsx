@@ -33,8 +33,17 @@ export default function OnboardingPage() {
   const { update } = useSession();
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
+  const [slug, setSlug] = useState("");
   const [timezone, setTimezone] = useState("America/New_York");
   const [bookingBaseUrl, setBookingBaseUrl] = useState("");
+
+  function generateSlug(businessName: string) {
+    return businessName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 60);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -44,7 +53,7 @@ export default function OnboardingPage() {
       const res = await fetch("/api/business", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, timezone, bookingBaseUrl }),
+        body: JSON.stringify({ name, slug, timezone, bookingBaseUrl }),
       });
 
       if (!res.ok) {
@@ -134,11 +143,46 @@ export default function OnboardingPage() {
                 label="Business name"
                 id="name"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => {
+                  setName(e.target.value);
+                  setSlug(generateSlug(e.target.value));
+                }}
                 placeholder="Acme Salon"
                 required
                 hint="This is how your business will appear to customers."
               />
+
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="slug"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Booking page URL
+                </label>
+                <div className="flex items-center gap-0 rounded-lg border border-gray-300 bg-white shadow-sm transition-all duration-200 hover:border-gray-400 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20">
+                  <span className="whitespace-nowrap pl-3.5 text-sm text-gray-400">
+                    rev-book.vercel.app/book/
+                  </span>
+                  <input
+                    id="slug"
+                    type="text"
+                    value={slug}
+                    onChange={(e) =>
+                      setSlug(
+                        e.target.value
+                          .toLowerCase()
+                          .replace(/[^a-z0-9-]/g, "")
+                      )
+                    }
+                    placeholder="acme-salon"
+                    required
+                    className="flex-1 border-0 bg-transparent px-1 py-2.5 text-sm font-medium text-gray-900 focus:outline-none focus:ring-0"
+                  />
+                </div>
+                <p className="text-xs text-gray-500">
+                  This is your public booking link. Customers will use it to book appointments.
+                </p>
+              </div>
 
               <div className="space-y-1.5">
                 <label
@@ -165,12 +209,12 @@ export default function OnboardingPage() {
               </div>
 
               <Input
-                label="External booking URL"
+                label="External booking URL (optional)"
                 id="bookingBaseUrl"
                 value={bookingBaseUrl}
                 onChange={(e) => setBookingBaseUrl(e.target.value)}
                 placeholder="https://calendly.com/your-business"
-                hint="Optional. Link to your external booking page."
+                hint="Optional. If you also use an external booking system."
               />
 
               {/* ---------- Submit ---------- */}

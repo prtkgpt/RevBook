@@ -3,6 +3,8 @@ import { z } from "zod";
 // ── Business ──
 export const businessSchema = z.object({
   name: z.string().min(1, "Business name is required").max(100),
+  slug: z.string().min(2, "URL slug is required").max(60)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Only lowercase letters, numbers, and hyphens"),
   timezone: z.string().min(1, "Timezone is required"),
   bookingBaseUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
 });

@@ -7,6 +7,7 @@ async function main() {
   console.log("Seeding database...");
 
   // Clean existing data
+  await prisma.booking.deleteMany();
   await prisma.messageLog.deleteMany();
   await prisma.offer.deleteMany();
   await prisma.customer.deleteMany();
@@ -21,6 +22,7 @@ async function main() {
   const business = await prisma.business.create({
     data: {
       name: "Demo Salon",
+      slug: "demo-salon",
       timezone: "America/New_York",
       bookingBaseUrl: "https://example.com/book",
     },

@@ -13,9 +13,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Already have a business" }, { status: 400 });
     }
 
+    // Check slug uniqueness
+    const existingSlug = await prisma.business.findUnique({
+      where: { slug: data.slug },
+    });
+    if (existingSlug) {
+      return NextResponse.json({ error: "This URL slug is already taken" }, { status: 409 });
+    }
+
     const business = await prisma.business.create({
       data: {
         name: data.name,
+        slug: data.slug,
         timezone: data.timezone,
         bookingBaseUrl: data.bookingBaseUrl || null,
       },
