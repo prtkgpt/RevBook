@@ -14,13 +14,13 @@ export function Badge({
   return (
     <span
       className={clsx(
-        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+        "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold leading-none",
         {
-          "bg-gray-100 text-gray-800": variant === "default",
-          "bg-green-100 text-green-800": variant === "success",
-          "bg-yellow-100 text-yellow-800": variant === "warning",
-          "bg-red-100 text-red-800": variant === "danger",
-          "bg-blue-100 text-blue-800": variant === "info",
+          "bg-gray-100 text-gray-700": variant === "default",
+          "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-600/20": variant === "success",
+          "bg-amber-50 text-amber-700 ring-1 ring-inset ring-amber-600/20": variant === "warning",
+          "bg-rose-50 text-rose-700 ring-1 ring-inset ring-rose-600/20": variant === "danger",
+          "bg-indigo-50 text-indigo-700 ring-1 ring-inset ring-indigo-600/20": variant === "info",
         },
         className
       )}
