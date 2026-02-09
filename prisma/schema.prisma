@@ -71,7 +71,7 @@ model User {
 model Business {
   id              String   @id @default(cuid())
   name            String
-  slug            String   @unique
+  slug            String   @unique @default(dbgenerated("gen_random_uuid()::text"))
   timezone        String   @default("America/New_York")
   bookingBaseUrl  String?
   createdAt       DateTime @default(now())
