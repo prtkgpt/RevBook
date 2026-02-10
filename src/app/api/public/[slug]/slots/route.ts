@@ -8,6 +8,8 @@ export async function GET(
 ) {
   try {
     const { slug } = params;
+    const templateId = req.nextUrl.searchParams.get("templateId");
+    const date = req.nextUrl.searchParams.get("date");
 
     const business = await prisma.business.findUnique({
       where: { slug },
@@ -22,12 +24,29 @@ export async function GET(
 
     const now = new Date();
 
+    // Build where clause with optional filters
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: any = {
+      businessId: business.id,
+      status: "OPEN",
+    };
+
+    if (templateId) {
+      where.templateId = templateId;
+    }
+
+    if (date) {
+      const dayStart = new Date(date + "T00:00:00");
+      const dayEnd = new Date(date + "T23:59:59.999");
+      // For today, exclude past times
+      const effectiveStart = dayStart > now ? dayStart : now;
+      where.startTime = { gte: effectiveStart, lte: dayEnd };
+    } else {
+      where.startTime = { gt: now };
+    }
+
     const slots = await prisma.slot.findMany({
-      where: {
-        businessId: business.id,
-        status: "OPEN",
-        startTime: { gt: now },
-      },
+      where,
       orderBy: { startTime: "asc" },
     });
 
