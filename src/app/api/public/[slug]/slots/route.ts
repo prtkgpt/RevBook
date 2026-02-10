@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { findBestRule, calculateDiscountedPrice } from "@/lib/rule-engine";
+import { startOfDayInTz, endOfDayInTz } from "@/lib/timezone";
 
 export async function GET(
   req: NextRequest,
@@ -22,6 +23,7 @@ export async function GET(
       );
     }
 
+    const timezone = business.timezone || "America/New_York";
     const now = new Date();
 
     // Build where clause with optional filters
@@ -36,8 +38,9 @@ export async function GET(
     }
 
     if (date) {
-      const dayStart = new Date(date + "T00:00:00");
-      const dayEnd = new Date(date + "T23:59:59.999");
+      // Filter to specific date in the business timezone
+      const dayStart = startOfDayInTz(date, timezone);
+      const dayEnd = endOfDayInTz(date, timezone);
       // For today, exclude past times
       const effectiveStart = dayStart > now ? dayStart : now;
       where.startTime = { gte: effectiveStart, lte: dayEnd };
@@ -83,7 +86,7 @@ export async function GET(
       });
 
     return NextResponse.json({
-      business: { name: business.name, slug: business.slug },
+      business: { name: business.name, slug: business.slug, timezone },
       slots: result,
     });
   } catch (error) {

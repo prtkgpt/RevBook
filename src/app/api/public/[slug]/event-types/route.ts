@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { utcToLocalDateStr } from "@/lib/timezone";
 
 export async function GET(
   _req: NextRequest,
@@ -19,6 +20,7 @@ export async function GET(
       );
     }
 
+    const timezone = business.timezone || "America/New_York";
     const now = new Date();
 
     const templates = await prisma.slotTemplate.findMany({
@@ -43,10 +45,11 @@ export async function GET(
     });
 
     const eventTypes = templates.map((t) => {
+      // Compute available dates in business timezone (not UTC)
       const dateSet = new Set(
         t.slots
           .filter((s) => s.bookedCount < s.capacity)
-          .map((s) => s.startTime.toISOString().split("T")[0])
+          .map((s) => utcToLocalDateStr(s.startTime, timezone))
       );
       const availableDates = Array.from(dateSet).sort();
 
@@ -61,7 +64,7 @@ export async function GET(
     });
 
     return NextResponse.json({
-      business: { name: business.name, slug: business.slug },
+      business: { name: business.name, slug: business.slug, timezone },
       eventTypes,
     });
   } catch (error) {

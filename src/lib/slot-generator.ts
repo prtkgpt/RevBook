@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { localTimeToUTC, utcToLocalDateStr } from "@/lib/timezone";
 
 interface TimeWindow {
   start: string; // "09:00"
@@ -9,15 +10,18 @@ type WeeklyHours = Record<string, TimeWindow[]>; // "0"-"6" => windows
 
 /**
  * Generate individual Slot records from a SlotTemplate for the next N days.
+ * Times in weeklyHours are interpreted in the business timezone.
  * Skips any slots whose startTime already exists for this template.
  */
 export async function generateSlotsFromTemplate(templateId: string) {
   const template = await prisma.slotTemplate.findUnique({
     where: { id: templateId },
+    include: { business: { select: { timezone: true } } },
   });
 
   if (!template || !template.enabled) return { created: 0, skipped: 0 };
 
+  const timezone = template.business.timezone || "America/New_York";
   const weeklyHours: WeeklyHours = JSON.parse(template.weeklyHours);
   const now = new Date();
   const minNotice = template.minNoticeHours * 60 * 60 * 1000;
@@ -47,12 +51,30 @@ export async function generateSlotsFromTemplate(templateId: string) {
   }> = [];
 
   // Iterate each day from today to endDate
-  const current = new Date(now);
-  current.setHours(0, 0, 0, 0);
+  // Use the business timezone to determine dates and day-of-week
+  const currentDate = new Date(now);
+  currentDate.setUTCHours(0, 0, 0, 0);
 
-  while (current <= endDate) {
-    const dayOfWeek = current.getDay().toString(); // 0=Sunday
-    const windows = weeklyHours[dayOfWeek] || [];
+  // Start from today in the business timezone
+  const todayStr = utcToLocalDateStr(now, timezone);
+  let dateCursor = new Date(todayStr + "T00:00:00Z");
+
+  while (dateCursor <= endDate) {
+    const dateStr = dateCursor.toISOString().split("T")[0]; // YYYY-MM-DD
+
+    // Day of week in the business timezone (0=Sunday)
+    const localDate = new Date(dateStr + "T12:00:00Z"); // noon to avoid edge cases
+    const dayOfWeek = new Intl.DateTimeFormat("en-US", {
+      timeZone: timezone,
+      weekday: "short",
+    }).format(localDate);
+
+    // Map weekday name to number
+    const dayMap: Record<string, string> = {
+      Sun: "0", Mon: "1", Tue: "2", Wed: "3", Thu: "4", Fri: "5", Sat: "6",
+    };
+    const dayKey = dayMap[dayOfWeek] || "0";
+    const windows = weeklyHours[dayKey] || [];
 
     for (const window of windows) {
       const [startH, startM] = window.start.split(":").map(Number);
@@ -64,16 +86,15 @@ export async function generateSlotsFromTemplate(templateId: string) {
       const windowEndMinutes = endH * 60 + endM;
 
       while (slotStartMinutes + template.durationMinutes <= windowEndMinutes) {
-        const slotStart = new Date(current);
-        slotStart.setHours(
-          Math.floor(slotStartMinutes / 60),
-          slotStartMinutes % 60,
-          0,
-          0
-        );
+        const h = Math.floor(slotStartMinutes / 60);
+        const m = slotStartMinutes % 60;
+        const timeStr = `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
 
-        const slotEnd = new Date(slotStart);
-        slotEnd.setMinutes(slotEnd.getMinutes() + template.durationMinutes);
+        // Convert business-local time to UTC
+        const slotStart = localTimeToUTC(dateStr, timeStr, timezone);
+        const slotEnd = new Date(
+          slotStart.getTime() + template.durationMinutes * 60 * 1000
+        );
 
         // Skip if too soon (min notice)
         if (slotStart.getTime() - now.getTime() >= minNotice) {
@@ -95,7 +116,8 @@ export async function generateSlotsFromTemplate(templateId: string) {
       }
     }
 
-    current.setDate(current.getDate() + 1);
+    // Next day
+    dateCursor = new Date(dateCursor.getTime() + 24 * 60 * 60 * 1000);
   }
 
   if (slotsToCreate.length === 0) return { created: 0, skipped: existingSlots.length };

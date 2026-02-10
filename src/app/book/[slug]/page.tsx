@@ -31,6 +31,7 @@ interface TimeSlot {
 
 interface BusinessInfo {
   name: string;
+  timezone?: string;
 }
 
 type Step = "service" | "date" | "time" | "details" | "confirmed";
@@ -47,6 +48,39 @@ function generateDates(count: number): string[] {
   return Array.from({ length: count }, (_, i) =>
     format(addDays(new Date(), i), "yyyy-MM-dd")
   );
+}
+
+/** Format a UTC ISO string as a time in the business timezone (e.g. "9:00 AM") */
+function formatTimeInTz(isoStr: string, tz: string): string {
+  return new Date(isoStr).toLocaleTimeString("en-US", {
+    timeZone: tz,
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+/** Format a date string (YYYY-MM-DD) as a readable date (e.g. "Tuesday, February 10, 2026") */
+function formatLongDate(dateStr: string): string {
+  const d = new Date(dateStr + "T12:00:00Z");
+  return d.toLocaleDateString("en-US", {
+    timeZone: "UTC",
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
+/** Format a date string as short date (e.g. "Tue, Feb 10") */
+function formatShortDate(dateStr: string): string {
+  const d = new Date(dateStr + "T12:00:00Z");
+  return d.toLocaleDateString("en-US", {
+    timeZone: "UTC",
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 /* ------------------------------------------------------------------ */
@@ -312,13 +346,19 @@ export default function PublicBookingPage({
       }
 
       // Direct booking success
+      const tz = business?.timezone || "America/New_York";
       setConfirmation({
         serviceType: selectedSlot.serviceType,
-        date: format(
-          new Date(selectedSlot.startTime),
-          "EEEE, MMMM d, yyyy"
-        ),
-        time: `${format(new Date(selectedSlot.startTime), "h:mm a")} – ${format(new Date(selectedSlot.endTime), "h:mm a")}`,
+        date: selectedDate
+          ? formatLongDate(selectedDate)
+          : new Date(selectedSlot.startTime).toLocaleDateString("en-US", {
+              timeZone: tz,
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            }),
+        time: `${formatTimeInTz(selectedSlot.startTime, tz)} – ${formatTimeInTz(selectedSlot.endTime, tz)}`,
         priceCents: selectedSlot.currentPriceCents,
       });
       setStep("confirmed");
@@ -554,17 +594,14 @@ export default function PublicBookingPage({
             )}
             {selectedDate && (
               <SelectionBadge
-                label={format(
-                  new Date(selectedDate + "T00:00:00"),
-                  "EEE, MMM d"
-                )}
+                label={formatShortDate(selectedDate)}
               />
             )}
             {selectedSlot && (
               <SelectionBadge
-                label={format(
-                  new Date(selectedSlot.startTime),
-                  "h:mm a"
+                label={formatTimeInTz(
+                  selectedSlot.startTime,
+                  business?.timezone || "America/New_York"
                 )}
               />
             )}
@@ -684,10 +721,22 @@ export default function PublicBookingPage({
                 const dateObj = new Date(dateStr + "T00:00:00");
                 const isAvailable = availableSet.has(dateStr);
                 const isSelected = selectedDate === dateStr;
-                const isToday = dateStr === format(new Date(), "yyyy-MM-dd");
-                const dayOfWeek = format(dateObj, "EEE");
-                const dayNum = format(dateObj, "d");
-                const month = format(dateObj, "MMM");
+                const today = new Date();
+                const isToday =
+                  dateStr ===
+                  `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+                const dayOfWeek = dateObj.toLocaleDateString("en-US", {
+                  timeZone: "UTC",
+                  weekday: "short",
+                });
+                const dayNum = dateObj.toLocaleDateString("en-US", {
+                  timeZone: "UTC",
+                  day: "numeric",
+                });
+                const month = dateObj.toLocaleDateString("en-US", {
+                  timeZone: "UTC",
+                  month: "short",
+                });
 
                 return (
                   <button
@@ -814,7 +863,10 @@ export default function PublicBookingPage({
                           isSelected ? "text-white" : "text-gray-900"
                         }`}
                       >
-                        {format(new Date(slot.startTime), "h:mm a")}
+                        {formatTimeInTz(
+                          slot.startTime,
+                          business?.timezone || "America/New_York"
+                        )}
                       </p>
 
                       {/* Price */}
@@ -909,18 +961,21 @@ export default function PublicBookingPage({
                   <div className="flex justify-between border-t border-gray-100 pt-3">
                     <span className="text-gray-500">Date</span>
                     <span className="font-medium text-gray-900">
-                      {format(
-                        new Date(selectedDate + "T00:00:00"),
-                        "EEEE, MMMM d, yyyy"
-                      )}
+                      {formatLongDate(selectedDate)}
                     </span>
                   </div>
                   <div className="flex justify-between border-t border-gray-100 pt-3">
                     <span className="text-gray-500">Time</span>
                     <span className="font-medium text-gray-900">
-                      {format(new Date(selectedSlot.startTime), "h:mm a")}
+                      {formatTimeInTz(
+                        selectedSlot.startTime,
+                        business?.timezone || "America/New_York"
+                      )}
                       {" – "}
-                      {format(new Date(selectedSlot.endTime), "h:mm a")}
+                      {formatTimeInTz(
+                        selectedSlot.endTime,
+                        business?.timezone || "America/New_York"
+                      )}
                     </span>
                   </div>
                   <div className="flex justify-between border-t border-gray-100 pt-3">
